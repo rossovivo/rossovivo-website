@@ -1,0 +1,423 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Hurricane&display=swap");
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham/Gotham Light/Gotham Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham/Gotham Medium/Gotham Medium.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham/Gotham Regular/Gotham Regular.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham/Gotham Bold/Gotham Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham/Gotham Italic/Gotham Italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gotham";
+  src: url("/fonts/Gotham/Gotham Bold Italic/Gotham Bold Italic.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Rossovivo Design System - Authentic Italian Pizzeria */
+
+@layer base {
+  :root {
+    /* Core Brand Colors */
+    --chili: 5.78 69.17% 47.06%;
+    --chili-dark: 8 85% 38%;
+    --chili-light: 8 85% 58%;
+
+    /* Neutrals - Warm Paper Tones */
+    --cream: 40 30% 96%;
+    --cream-dark: 35 20% 90%;
+    --paper: 38 25% 93%;
+    --charcoal: 240 1.52% 18.88%;
+    --charcoal-light: 0 0% 20%;
+
+    /* Semantic Tokens */
+    --background: 40 30% 96%;
+    --foreground: 0 0% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 12%;
+
+    --primary: 5.78 69.17% 47.06%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 20% 90%;
+    --secondary-foreground: 0 0% 12%;
+
+    --muted: 35 15% 85%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 142 55% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 35 15% 85%;
+    --input: 35 15% 85%;
+    --ring: 8 85% 48%;
+
+    --radius: 0.5rem;
+
+    /* Custom Design Tokens */
+    --gradient-fire: linear-gradient(135deg, hsl(8 85% 48%), hsl(25 95% 55%));
+    --gradient-hero: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+    --shadow-warm: 0 4px 20px -5px hsl(8 85% 48% / 0.25);
+    --shadow-soft: 0 4px 30px -10px rgba(0, 0, 0, 0.15);
+    --shadow-card: 0 2px 20px -5px rgba(0, 0, 0, 0.1);
+
+    /* Typography */
+    --font-display: "Gotham", "Gotham Book", "Avenir Next", "Inter", sans-serif;
+    --font-body: "Inter", sans-serif;
+    --font-script: "Hurricane", cursive;
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 40 30% 96%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 40 30% 96%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 40 30% 96%;
+
+    --primary: 8 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 40 30% 96%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 142 55% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 8 85% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    @apply font-light tracking-tight;
+  }
+}
+
+@layer components {
+  /* Hero Button Styles */
+  .btn-hero {
+    @apply relative overflow-hidden px-8 py-4 text-lg font-semibold transition-all duration-300;
+    @apply bg-primary text-primary-foreground rounded-full;
+    @apply hover:scale-105 hover:shadow-lg;
+    box-shadow: var(--shadow-warm);
+  }
+
+  .btn-hero:hover {
+    box-shadow: 0 8px 30px -5px hsl(var(--primary) / 0.4);
+  }
+
+  .btn-hero-outline {
+    @apply relative overflow-hidden px-8 py-4 text-lg font-semibold transition-all duration-300;
+    @apply bg-transparent text-white border-2 border-white rounded-full;
+    @apply hover:bg-white hover:text-charcoal hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 text-base font-medium transition-all duration-300;
+    @apply bg-charcoal text-cream rounded-full;
+    @apply hover:bg-charcoal-light hover:scale-105;
+  }
+
+  /* Text Styles */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-fire);
+  }
+
+  .heading-display {
+    font-family: var(--font-display);
+    @apply text-5xl md:text-6xl lg:text-7xl font-light leading-none tracking-tight;
+  }
+
+  .heading-section {
+    font-family: var(--font-display);
+    @apply text-4xl md:text-5xl lg:text-6xl font-light leading-tight;
+  }
+
+  .heading-card {
+    font-family: var(--font-display);
+    @apply text-2xl md:text-3xl font-light;
+  }
+
+  /* Card Styles */
+  .card-warm {
+    @apply bg-card rounded-2xl p-6 md:p-8 transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-warm:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Link Styles */
+  .link-underline {
+    @apply relative inline-block;
+  }
+
+  .link-underline::after {
+    content: "";
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-primary;
+    @apply origin-bottom-right scale-x-0 transition-transform duration-300;
+  }
+
+  .link-underline:hover::after {
+    @apply origin-bottom-left scale-x-100;
+  }
+
+  /* Section Styles */
+  .section-padding {
+    @apply py-16;
+  }
+
+  .container-tight {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Form Styles */
+  .input-warm {
+    @apply w-full px-4 py-3 rounded-xl border border-border bg-white;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+    @apply transition-all duration-200;
+  }
+
+  .input-warm:focus {
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
+  }
+
+  /* Image Styles */
+  .img-cover {
+    @apply w-full h-full object-cover;
+  }
+
+  /* Paper Texture Overlay */
+  .paper-texture {
+    position: relative;
+  }
+
+  .paper-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .font-display.font-bold,
+  .font-display.font-semibold {
+    font-weight: 400;
+  }
+
+  .font-script {
+    font-family: var(--font-script);
+  }
+
+  .steam-img {
+    position: absolute;
+    width: 22px;
+    height: 44px;
+    animation: steam-rise 2.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .flame-anim {
+    background-image: url("/flame-1.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    filter: drop-shadow(0 6px 10px rgba(201, 42, 42, 0.35));
+    opacity: 0.9;
+    animation: flame-flicker 0.9s steps(1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flame-anim {
+      animation: none;
+    }
+  }
+
+  @keyframes flame-flicker {
+    0% {
+      background-image: url("/flame-1.png");
+    }
+    33% {
+      background-image: url("/flame-2.png");
+    }
+    66% {
+      background-image: url("/flame-3.png");
+    }
+    100% {
+      background-image: url("/flame-1.png");
+    }
+  }
+
+  .steam-1 {
+    left: 2px;
+    top: -18px;
+    animation-delay: 0s;
+  }
+
+  .steam-2 {
+    left: 18px;
+    top: -22px;
+    animation-delay: 0.6s;
+  }
+
+  .steam-3 {
+    left: 34px;
+    top: -16px;
+    animation-delay: 1.1s;
+  }
+
+  /* Animations */
+  .animate-wiggle {
+    animation: wiggle 1s ease-in-out infinite;
+  }
+
+  .animate-bounce-soft {
+    animation: bounce-soft 2s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes bounce-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+  }
+}
+
+@keyframes steam-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  20% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.1);
+  }
+}
