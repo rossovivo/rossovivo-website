@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { StickyEventCTA } from "@/components/layout/StickyEventCTA";
-import { getLocations, getSiteSettings } from "@/lib/contentful-cms";
+import { getLocations, getSiteSettings } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Rossovivo Pizzeria",

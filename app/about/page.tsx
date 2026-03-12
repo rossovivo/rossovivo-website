@@ -1,5 +1,5 @@
 import { AboutPageClient } from "@/components/about/AboutPageClient";
-import { getAboutPageContent } from "@/lib/contentful-cms";
+import { getAboutPageContent } from "@/lib/cms";
 
 export default async function AboutPage() {
   const content = await getAboutPageContent();

@@ -1,5 +1,5 @@
 import { LocationsPageClient } from "@/components/locations/LocationsPageClient";
-import { getLocations } from "@/lib/contentful-cms";
+import { getLocations } from "@/lib/cms";
 
 export default async function LocationsPage() {
   const locations = await getLocations();

@@ -1,0 +1,129 @@
+import { defineField, defineType } from "sanity";
+
+export const cateringPageType = defineType({
+  name: "cateringPage",
+  title: "Catering Page",
+  type: "document",
+  fields: [
+    defineField({
+      name: "internalName",
+      title: "Internal Name",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "title",
+      title: "Title",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({ name: "subtitle", title: "Subtitle", type: "text" }),
+    defineField({
+      name: "heroImage",
+      title: "Hero Image",
+      type: "image",
+      options: { hotspot: false },
+    }),
+    defineField({
+      name: "polaroidEyebrow",
+      title: "Polaroid Section Eyebrow",
+      type: "string",
+    }),
+    defineField({
+      name: "polaroidTitle",
+      title: "Polaroid Section Title",
+      type: "string",
+    }),
+    defineField({
+      name: "polaroidItems",
+      title: "Polaroid Items",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "cateringPolaroidItem" }] }],
+    }),
+    defineField({
+      name: "featuresEyebrow",
+      title: "Features Section Eyebrow",
+      type: "string",
+    }),
+    defineField({
+      name: "featuresTitle",
+      title: "Features Section Title",
+      type: "string",
+    }),
+    defineField({
+      name: "featureItems",
+      title: "Feature Items",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "cateringFeatureItem" }] }],
+    }),
+    defineField({
+      name: "includesEyebrow",
+      title: "Includes Section Eyebrow",
+      type: "string",
+    }),
+    defineField({
+      name: "includesTitle",
+      title: "Includes Section Title",
+      type: "string",
+    }),
+    defineField({
+      name: "includesItems",
+      title: "Includes Items",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "cateringMediaItem" }] }],
+    }),
+    defineField({
+      name: "optionalEyebrow",
+      title: "Optional Section Eyebrow",
+      type: "string",
+    }),
+    defineField({
+      name: "optionalTitle",
+      title: "Optional Section Title",
+      type: "string",
+    }),
+    defineField({
+      name: "optionalItems",
+      title: "Optional Items",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "cateringMediaItem" }] }],
+    }),
+    defineField({ name: "eventFormTitle", title: "Event Form Title", type: "string" }),
+    defineField({
+      name: "eventFormSubtitle",
+      title: "Event Form Subtitle",
+      type: "text",
+    }),
+    defineField({
+      name: "eventFormImage",
+      title: "Event Form Image",
+      type: "image",
+      options: { hotspot: false },
+    }),
+    defineField({
+      name: "eventTypeOptions",
+      title: "Event Type Options",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "availableSpaceOptions",
+      title: "Available Space Options",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "setupPreferenceOptions",
+      title: "Setup Preference Options",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+  ],
+  preview: {
+    select: {
+      title: "internalName",
+      subtitle: "title",
+      media: "heroImage",
+    },
+  },
+});

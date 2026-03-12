@@ -8,7 +8,7 @@ import {
   getHomePageContent,
   getLocations,
   getSiteSettings,
-} from "@/lib/contentful-cms";
+} from "@/lib/cms";
 
 const Index = async () => {
   const [homePage, locations, siteSettings, cateringPage] = await Promise.all([

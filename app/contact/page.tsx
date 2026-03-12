@@ -4,7 +4,7 @@ import {
   getContactPageContent,
   getLocations,
   getSiteSettings,
-} from "@/lib/contentful-cms";
+} from "@/lib/cms";
 
 export default async function ContactPage() {
   const [content, siteSettings, locations, cateringPage] = await Promise.all([
