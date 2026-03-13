@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Resend } from "resend";
 import { getPostHogClient } from "@/lib/posthog-server";
+import {
+  sendConversionEvent,
+  extractMetaCookies,
+  getClientIp,
+} from "@/lib/meta-conversions";
 
 const contactSchema = z.object({
   segmentName: z.string().trim().min(1).max(120),
@@ -174,6 +179,11 @@ export async function POST(request: Request) {
   const html = buildEmailHtml(payload);
 
   const distinctId = request.headers.get("x-posthog-distinct-id") ?? `anon_contact_${Date.now()}`;
+  const metaEventId = request.headers.get("x-meta-event-id") ?? `srv_${Date.now()}`;
+  const clientIp = getClientIp(request);
+  const userAgent = request.headers.get("user-agent");
+  const { fbp, fbc } = extractMetaCookies(request.headers.get("cookie"));
+  const sourceUrl = request.headers.get("referer") ?? "";
 
   try {
     const { data, error } = await resend.emails.send({
@@ -219,6 +229,23 @@ export async function POST(request: Request) {
       },
     });
     await posthog.shutdown();
+
+    sendConversionEvent({
+      eventName: "Lead",
+      eventId: metaEventId,
+      sourceUrl,
+      userData: {
+        ip: clientIp,
+        userAgent,
+        fbp,
+        fbc,
+        phone: payload.phone,
+      },
+      customData: {
+        content_name: payload.segmentName,
+        content_category: "catering_enquiry",
+      },
+    });
 
     return NextResponse.json(
       { success: true, id: data?.id ?? null },

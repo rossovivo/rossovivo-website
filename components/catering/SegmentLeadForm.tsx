@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import posthog from "posthog-js";
+import { trackMetaEvent, generateEventId } from "@/lib/meta-pixel";
 import { Calendar, MapPin, MessageSquare, Phone, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -63,10 +64,13 @@ export function SegmentLeadForm({
     setIsSubmitting(true);
 
     try {
+      const metaEventId = generateEventId();
+
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-meta-event-id": metaEventId,
         },
         body: JSON.stringify({
           segmentName,
@@ -89,6 +93,10 @@ export function SegmentLeadForm({
         setup_preference: formData.setupPreference,
         party_size: formData.partySize ? Number(formData.partySize) : undefined,
       });
+      trackMetaEvent("Lead", {
+        content_name: segmentName,
+        content_category: "catering_enquiry",
+      }, metaEventId);
 
       toast({
         title: "Enquiry Sent",

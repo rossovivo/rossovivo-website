@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import posthog from 'posthog-js';
+import { trackMetaEvent } from '@/lib/meta-pixel';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -62,13 +63,17 @@ export function StickyEventCTA({
               >
                 <Link
                   href={eventHref}
-                  onClick={() =>
+                  onClick={() => {
                     posthog.capture("sticky_event_cta_clicked", {
                       event_href: eventHref,
                       event_label: eventLabel,
                       page: pathname,
-                    })
-                  }
+                    });
+                    trackMetaEvent("ViewContent", {
+                      content_name: eventLabel,
+                      content_category: "sticky_cta",
+                    });
+                  }}
                 >
                   <Flame className="w-5 h-5" />
                   <span className="hidden sm:inline">{eventLabel}</span>
@@ -87,11 +92,15 @@ export function StickyEventCTA({
                   href={`https://wa.me/${whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() =>
+                  onClick={() => {
                     posthog.capture("whatsapp_cta_clicked", {
                       page: pathname,
-                    })
-                  }
+                    });
+                    trackMetaEvent("Contact", {
+                      content_name: "WhatsApp",
+                      content_category: "messaging",
+                    });
+                  }}
                 >
                   <FaWhatsapp className="h-5 w-5" />
                   <span className="hidden sm:inline">WhatsApp Us</span>

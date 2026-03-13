@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import posthog from "posthog-js";
+import { trackMetaEvent, trackMetaCustomEvent } from "@/lib/meta-pixel";
 import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -244,12 +245,16 @@ function LocationCard({ location }: { location: CmsLocation }) {
               href={location.menuUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
+              onClick={() => {
                 posthog.capture("order_now_clicked", {
                   location_id: location.id,
                   location_name: location.name,
-                })
-              }
+                });
+                trackMetaEvent("InitiateCheckout", {
+                  content_name: location.name,
+                  content_category: "order",
+                });
+              }}
             >
               Order Now
               <ArrowRight className="h-4 w-4" />
@@ -260,12 +265,16 @@ function LocationCard({ location }: { location: CmsLocation }) {
               href={location.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
+              onClick={() => {
                 posthog.capture("get_directions_clicked", {
                   location_id: location.id,
                   location_name: location.name,
-                })
-              }
+                });
+                trackMetaCustomEvent("FindLocation", {
+                  content_name: location.name,
+                  content_category: "directions",
+                });
+              }}
             >
               Get Directions
             </a>

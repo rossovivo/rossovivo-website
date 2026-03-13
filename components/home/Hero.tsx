@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import posthog from "posthog-js";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -133,13 +134,17 @@ export function Hero({
             <Button asChild variant="hero" className="gap-2">
               <Link
                 href={primaryHref}
-                onClick={() =>
+                onClick={() => {
                   posthog.capture("hero_cta_clicked", {
                     cta_type: "primary",
                     cta_label: primaryLabel,
                     cta_href: primaryHref,
-                  })
-                }
+                  });
+                  trackMetaEvent("ViewContent", {
+                    content_name: primaryLabel,
+                    content_category: "hero_cta",
+                  });
+                }}
               >
                 {primaryLabel}
                 <ArrowRight className="w-5 h-5" />
@@ -168,11 +173,15 @@ export function Hero({
                         href={eMenuMediaCityUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() =>
+                        onClick={() => {
                           posthog.capture("emenu_opened", {
                             location: "media_city",
-                          })
-                        }
+                          });
+                          trackMetaEvent("ViewContent", {
+                            content_name: "eMenu Media City",
+                            content_category: "menu",
+                          });
+                        }}
                       >
                         View Media City eMenu
                       </a>
@@ -187,11 +196,15 @@ export function Hero({
                         href={eMenuBusinessBayUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() =>
+                        onClick={() => {
                           posthog.capture("emenu_opened", {
                             location: "business_bay",
-                          })
-                        }
+                          });
+                          trackMetaEvent("ViewContent", {
+                            content_name: "eMenu Business Bay",
+                            content_category: "menu",
+                          });
+                        }}
                       >
                         View Business Bay eMenu
                       </a>
@@ -203,13 +216,17 @@ export function Hero({
               <Button asChild variant="heroOutline" className="gap-2">
                 <Link
                   href={secondaryHref}
-                  onClick={() =>
+                  onClick={() => {
                     posthog.capture("hero_cta_clicked", {
                       cta_type: "secondary",
                       cta_label: secondaryLabel,
                       cta_href: secondaryHref,
-                    })
-                  }
+                    });
+                    trackMetaEvent("ViewContent", {
+                      content_name: secondaryLabel,
+                      content_category: "hero_cta",
+                    });
+                  }}
                 >
                   <UtensilsCrossed className="w-5 h-5" />
                   {secondaryLabel}

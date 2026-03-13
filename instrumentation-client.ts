@@ -1,4 +1,5 @@
 import posthog from "posthog-js";
+import { initMetaPixel } from "@/lib/meta-pixel";
 
 posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
   api_host: "/ingest",
@@ -7,6 +8,8 @@ posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
   capture_exceptions: true,
   debug: process.env.NODE_ENV === "development",
 });
+
+initMetaPixel();
 
 // IMPORTANT: Never combine this approach with other client-side PostHog initialization approaches,
 // especially components like a PostHogProvider. instrumentation-client.ts is the correct solution
