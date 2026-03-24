@@ -32,3 +32,7 @@ coverage/
 
 # Vercel
 .vercel/
+
+# Sanity
+dist/
+.sanity/
