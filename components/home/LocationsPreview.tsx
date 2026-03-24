@@ -350,7 +350,7 @@ export function LocationsPreview({
           }),
         );
       } catch {
-        // Keep fallback ratings if Contentful is unavailable.
+        // Keep fallback ratings if remote reviews are unavailable.
       }
     };
 

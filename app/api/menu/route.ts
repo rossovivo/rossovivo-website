@@ -1,24 +1,39 @@
-import { NextResponse } from 'next/server';
-import type { MenuCategory, MenuItem } from '@/lib/menu';
+import { NextResponse } from "next/server";
+import { createClient } from "@sanity/client";
+import type { MenuCategory, MenuItem } from "@/lib/menu";
 
-type ContentfulMenuEntry = {
-  sys?: {
-    createdAt?: string;
-  };
-  fields?: {
-    name?: unknown;
-    description?: unknown;
-    features?: unknown;
-    price?: unknown;
-    category?: unknown;
-    sortOrder?: unknown;
-  };
+type SanityMenuItem = {
+  name?: unknown;
+  description?: unknown;
+  features?: unknown;
+  price?: unknown;
+  category?: unknown;
+  sortOrder?: unknown;
+  _createdAt?: unknown;
 };
 
-const CONTENT_TYPE = 'menuItem';
-const MAX_ITEMS = 1000;
+type MenuApiResponse = {
+  categories: MenuCategory[];
+  error?: string;
+};
 
-export const dynamic = 'force-dynamic';
+const sanityProjectId = process.env.SANITY_PROJECT_ID?.trim();
+const sanityDataset = process.env.SANITY_DATASET?.trim();
+const sanityToken = process.env.SANITY_API_TOKEN?.trim();
+
+const hasSanity = Boolean(sanityProjectId && sanityDataset);
+
+const sanityClient = hasSanity
+  ? createClient({
+      projectId: sanityProjectId,
+      dataset: sanityDataset,
+      token: sanityToken || undefined,
+      apiVersion: "2023-10-01",
+      useCdn: false,
+    })
+  : null;
+
+export const dynamic = "force-dynamic";
 
 const asNumber = (value: unknown) => {
   const parsed = Number(value);
@@ -30,10 +45,10 @@ const normalizeFeatures = (features: unknown) => {
     const cleaned = features
       .map((item) => String(item).trim())
       .filter(Boolean);
-    return cleaned.length > 0 ? cleaned.join(' ') : undefined;
+    return cleaned.length > 0 ? cleaned.join(" ") : undefined;
   }
 
-  if (typeof features === 'string') {
+  if (typeof features === "string") {
     const cleaned = features.trim();
     return cleaned || undefined;
   }
@@ -41,7 +56,7 @@ const normalizeFeatures = (features: unknown) => {
   return undefined;
 };
 
-const normalizeMenuCategories = (entries: ContentfulMenuEntry[]): MenuCategory[] => {
+const normalizeMenuCategories = (items: SanityMenuItem[]): MenuCategory[] => {
   const grouped = new Map<
     string,
     {
@@ -50,28 +65,25 @@ const normalizeMenuCategories = (entries: ContentfulMenuEntry[]): MenuCategory[]
     }
   >();
 
-  for (const entry of entries) {
-    const fields = entry?.fields ?? {};
-    const name = typeof fields.name === 'string' ? fields.name.trim() : '';
-    const price = asNumber(fields.price);
+  for (const item of items) {
+    const name = typeof item.name === "string" ? item.name.trim() : "";
+    const price = asNumber(item.price);
 
-    if (!name || price === null) {
-      continue;
-    }
+    if (!name || price === null) continue;
 
     const categoryName =
-      typeof fields.category === 'string' && fields.category.trim()
-        ? fields.category.trim()
-        : 'Uncategorized';
+      typeof item.category === "string" && item.category.trim()
+        ? item.category.trim()
+        : "Uncategorized";
 
     const description =
-      typeof fields.description === 'string'
-        ? fields.description.trim() || undefined
+      typeof item.description === "string"
+        ? item.description.trim() || undefined
         : undefined;
-
-    const features = normalizeFeatures(fields.features);
-    const sortOrder = asNumber(fields.sortOrder) ?? Number.MAX_SAFE_INTEGER;
-    const createdAt = entry?.sys?.createdAt ?? '';
+    const features = normalizeFeatures(item.features);
+    const sortOrder = asNumber(item.sortOrder) ?? Number.MAX_SAFE_INTEGER;
+    const createdAt =
+      typeof item._createdAt === "string" ? item._createdAt : "";
 
     if (!grouped.has(categoryName)) {
       grouped.set(categoryName, {
@@ -100,64 +112,46 @@ const normalizeMenuCategories = (entries: ContentfulMenuEntry[]): MenuCategory[]
             a.createdAt.localeCompare(b.createdAt) ||
             a.name.localeCompare(b.name),
         )
-        .map(({ sortOrder, createdAt, ...item }) => item),
+        .map(({ sortOrder, createdAt, ...menuItem }) => menuItem),
     }))
     .filter((category) => category.items.length > 0);
 };
 
 export async function GET() {
-  const spaceId = process.env.CONTENTFUL_SPACE_ID;
-  const deliveryToken = process.env.CONTENTFUL_DELIVERY_TOKEN;
-  const environment = process.env.CONTENTFUL_ENVIRONMENT || 'master';
-
-  if (!spaceId || !deliveryToken) {
-    return NextResponse.json(
-      { categories: [], error: 'missing_contentful_env' },
+  if (!sanityClient) {
+    return NextResponse.json<MenuApiResponse>(
+      { categories: [], error: "missing_sanity_env" },
       { status: 200 },
     );
   }
 
-  const url = new URL(
-    `https://cdn.contentful.com/spaces/${spaceId}/environments/${environment}/entries`,
-  );
-  url.searchParams.set('content_type', CONTENT_TYPE);
-  url.searchParams.set('limit', String(MAX_ITEMS));
-  url.searchParams.set('order', 'fields.category,fields.sortOrder,sys.createdAt');
-
   try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${deliveryToken}`,
-      },
-      cache: 'no-store',
-    });
+    const items = await sanityClient.fetch<SanityMenuItem[]>(
+      `*[_type == "menuItem"] | order(category asc, sortOrder asc, _createdAt asc){
+        name,
+        description,
+        features,
+        price,
+        category,
+        sortOrder,
+        _createdAt
+      }`,
+    );
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { categories: [], error: `contentful_${response.status}` },
-        { status: 200 },
-      );
-    }
+    const categories = normalizeMenuCategories(Array.isArray(items) ? items : []);
 
-    const data = await response.json();
-    const entries = Array.isArray(data?.items)
-      ? (data.items as ContentfulMenuEntry[])
-      : [];
-
-    const categories = normalizeMenuCategories(entries);
-
-    return NextResponse.json(
+    return NextResponse.json<MenuApiResponse>(
       { categories },
       {
         status: 200,
         headers: {
-          'Cache-Control': 'no-store',
+          "Cache-Control": "no-store",
         },
       },
     );
-  } catch (error) {
-    return NextResponse.json(
-      { categories: [], error: 'fetch_failed' },
+  } catch {
+    return NextResponse.json<MenuApiResponse>(
+      { categories: [], error: "fetch_failed" },
       { status: 200 },
     );
   }

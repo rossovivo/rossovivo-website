@@ -1,15 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { createClient } from "@sanity/client";
 
-type ContentfulLocationReviewEntry = {
-  sys?: {
-    updatedAt?: string;
-    createdAt?: string;
-  };
-  fields?: {
-    locationId?: unknown;
-    rating?: unknown;
-    ratingCount?: unknown;
-  };
+type SanityLocationReview = {
+  locationId?: unknown;
+  rating?: unknown;
+  ratingCount?: unknown;
+  _updatedAt?: unknown;
+  _createdAt?: unknown;
 };
 
 type LocationReview = {
@@ -22,10 +19,28 @@ type LocationReviewWithMeta = LocationReview & {
   updatedAt: string;
 };
 
-const CONTENT_TYPE = 'locationReview';
-const MAX_ITEMS = 100;
+type LocationReviewsResponse = {
+  reviews: LocationReview[];
+  error?: string;
+};
 
-export const dynamic = 'force-dynamic';
+const sanityProjectId = process.env.SANITY_PROJECT_ID?.trim();
+const sanityDataset = process.env.SANITY_DATASET?.trim();
+const sanityToken = process.env.SANITY_API_TOKEN?.trim();
+
+const hasSanity = Boolean(sanityProjectId && sanityDataset);
+
+const sanityClient = hasSanity
+  ? createClient({
+      projectId: sanityProjectId,
+      dataset: sanityDataset,
+      token: sanityToken || undefined,
+      apiVersion: "2023-10-01",
+      useCdn: false,
+    })
+  : null;
+
+export const dynamic = "force-dynamic";
 
 const asNumber = (value: unknown) => {
   const parsed = Number(value);
@@ -33,36 +48,33 @@ const asNumber = (value: unknown) => {
 };
 
 const asString = (value: unknown) => {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const cleaned = value.trim();
     return cleaned || null;
   }
 
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (typeof value === "number" && Number.isFinite(value)) {
     return String(value);
   }
 
   return null;
 };
 
-const normalizeLocationReviews = (
-  entries: ContentfulLocationReviewEntry[],
-): LocationReview[] => {
+const normalizeLocationReviews = (items: SanityLocationReview[]): LocationReview[] => {
   const latestByLocation = new Map<string, LocationReviewWithMeta>();
 
-  for (const entry of entries) {
-    const fields = entry?.fields ?? {};
-    const locationId = asString(fields.locationId);
-    const rating = asNumber(fields.rating);
-    const ratingCount = asString(fields.ratingCount);
+  for (const item of items) {
+    const locationId = asString(item.locationId);
+    const rating = asNumber(item.rating);
+    const ratingCount = asString(item.ratingCount);
+    if (!locationId || rating === null || !ratingCount) continue;
 
-    if (!locationId || rating === null || !ratingCount) {
-      continue;
-    }
+    const updatedAt =
+      (typeof item._updatedAt === "string" && item._updatedAt) ||
+      (typeof item._createdAt === "string" && item._createdAt) ||
+      "";
 
-    const updatedAt = entry?.sys?.updatedAt ?? entry?.sys?.createdAt ?? '';
     const existing = latestByLocation.get(locationId);
-
     if (!existing || updatedAt > existing.updatedAt) {
       latestByLocation.set(locationId, {
         locationId,
@@ -79,58 +91,38 @@ const normalizeLocationReviews = (
 };
 
 export async function GET() {
-  const spaceId = process.env.CONTENTFUL_SPACE_ID;
-  const deliveryToken = process.env.CONTENTFUL_DELIVERY_TOKEN;
-  const environment = process.env.CONTENTFUL_ENVIRONMENT || 'master';
-
-  if (!spaceId || !deliveryToken) {
-    return NextResponse.json(
-      { reviews: [], error: 'missing_contentful_env' },
+  if (!sanityClient) {
+    return NextResponse.json<LocationReviewsResponse>(
+      { reviews: [], error: "missing_sanity_env" },
       { status: 200 },
     );
   }
 
-  const url = new URL(
-    `https://cdn.contentful.com/spaces/${spaceId}/environments/${environment}/entries`,
-  );
-  url.searchParams.set('content_type', CONTENT_TYPE);
-  url.searchParams.set('limit', String(MAX_ITEMS));
-  url.searchParams.set('order', 'fields.locationId,-sys.updatedAt');
-
   try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${deliveryToken}`,
-      },
-      cache: 'no-store',
-    });
+    const items = await sanityClient.fetch<SanityLocationReview[]>(
+      `*[_type == "locationReview"] | order(locationId asc, _updatedAt desc){
+        locationId,
+        rating,
+        ratingCount,
+        _updatedAt,
+        _createdAt
+      }`,
+    );
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { reviews: [], error: `contentful_${response.status}` },
-        { status: 200 },
-      );
-    }
+    const reviews = normalizeLocationReviews(Array.isArray(items) ? items : []);
 
-    const data = await response.json();
-    const entries = Array.isArray(data?.items)
-      ? (data.items as ContentfulLocationReviewEntry[])
-      : [];
-
-    const reviews = normalizeLocationReviews(entries);
-
-    return NextResponse.json(
+    return NextResponse.json<LocationReviewsResponse>(
       { reviews },
       {
         status: 200,
         headers: {
-          'Cache-Control': 'no-store',
+          "Cache-Control": "no-store",
         },
       },
     );
-  } catch (error) {
-    return NextResponse.json(
-      { reviews: [], error: 'fetch_failed' },
+  } catch {
+    return NextResponse.json<LocationReviewsResponse>(
+      { reviews: [], error: "fetch_failed" },
       { status: 200 },
     );
   }

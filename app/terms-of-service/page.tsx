@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SimpleRichText } from "@/components/contentful/SimpleRichText";
-import { getLegalPageContent } from "@/lib/contentful-cms";
+import { SimpleRichText } from "@/components/cms/SimpleRichText";
+import { getLegalPageContent } from "@/lib/cms";
 
 const TERMS_OF_SERVICE_SLUG = "terms-of-service";
 

@@ -1,29 +1,27 @@
-import {siteSettings} from './siteSettings'
-import {location} from './location'
-import {homePage} from './homePage'
-import {cateringPolaroidItem} from './cateringPolaroidItem'
-import {cateringFeatureItem} from './cateringFeatureItem'
-import {cateringMediaItem} from './cateringMediaItem'
-import {cateringPage} from './cateringPage'
-import {aboutPage} from './aboutPage'
-import {contactPage} from './contactPage'
-import {legalPage} from './legalPage'
-import {menuItem} from './menuItem'
-import {locationReview} from './locationReview'
+import { aboutPageType } from "./aboutPage";
+import { cateringFeatureItemType } from "./cateringFeatureItem";
+import { cateringMediaItemType } from "./cateringMediaItem";
+import { cateringPageType } from "./cateringPage";
+import { cateringPolaroidItemType } from "./cateringPolaroidItem";
+import { contactPageType } from "./contactPage";
+import { homePageType } from "./homePage";
+import { legalPageType } from "./legalPage";
+import { locationType } from "./location";
+import { locationReviewType } from "./locationReview";
+import { menuItemType } from "./menuItem";
+import { siteSettingsType } from "./siteSettings";
 
-export const schema = {
-  types: [
-    siteSettings,
-    location,
-    homePage,
-    cateringPolaroidItem,
-    cateringFeatureItem,
-    cateringMediaItem,
-    cateringPage,
-    aboutPage,
-    contactPage,
-    legalPage,
-    menuItem,
-    locationReview,
-  ],
-}
+export const schemaTypes = [
+  siteSettingsType,
+  locationType,
+  homePageType,
+  cateringPolaroidItemType,
+  cateringFeatureItemType,
+  cateringMediaItemType,
+  cateringPageType,
+  aboutPageType,
+  contactPageType,
+  legalPageType,
+  menuItemType,
+  locationReviewType,
+];

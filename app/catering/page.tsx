@@ -3,7 +3,7 @@ import {
   CateringEventTemplate,
   type CateringEventTemplateContent,
 } from "@/components/catering/CateringEventTemplate";
-import { getCateringPageContent } from "@/lib/contentful-cms";
+import { getCateringPageContent } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Catering | Rossovivo",

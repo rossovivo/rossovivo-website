@@ -139,7 +139,7 @@ export function MenuPieSection({
           setMenuCategories(mergeCategoriesForPie(data.categories));
         }
       } catch (error) {
-        // Keep fallback content if Contentful is unavailable.
+        // Keep fallback content if menu fetch is unavailable.
       }
     };
 

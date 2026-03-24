@@ -160,6 +160,25 @@ export type RichTextDocument = {
   content: RichTextNode[];
 };
 
+export type PortableTextSpan = {
+  _type: "span";
+  _key: string;
+  text: string;
+  marks?: string[];
+};
+
+export type PortableTextBlock = {
+  _type: "block";
+  _key: string;
+  style?: string;
+  children: PortableTextSpan[];
+  markDefs?: Array<Record<string, unknown>>;
+  listItem?: "bullet" | "number";
+  level?: number;
+};
+
+export type PortableText = PortableTextBlock[];
+
 export type LegalPageContent = {
   internalName: string;
   slug: string;
@@ -167,6 +186,6 @@ export type LegalPageContent = {
   seoTitle: string;
   seoDescription: string;
   lastUpdated: string;
-  body: RichTextDocument;
+  body: RichTextDocument | PortableText;
   contactEmail: string;
 };
