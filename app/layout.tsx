@@ -9,8 +9,27 @@ import { StickyEventCTA } from "@/components/layout/StickyEventCTA";
 import { getLocations, getSiteSettings } from "@/lib/cms";
 
 export const metadata: Metadata = {
-  title: "Rossovivo Pizzeria",
-  description: "Authentic wood-fired pizza, crafted with love and fire.",
+  title: {
+    default: "Rossovivo | Authentic Wood-Fired Italian Pizza in Dubai Since 2009",
+    template: "%s",
+  },
+  description:
+    "Craving real Italian pizza in Dubai? Rossovivo serves handcrafted wood-fired pizzas, pasta & Italian classics at Business Bay & Media City. Order now or dine in!",
+  keywords: [
+    "authentic Italian pizza Dubai",
+    "wood-fired pizza Dubai",
+    "Italian restaurant Dubai",
+    "artisan pizza Dubai",
+    "best pizza Dubai",
+    "pizza delivery Dubai",
+    "Rossovivo Dubai",
+    "Italian food Dubai",
+  ],
+  openGraph: {
+    siteName: "Rossovivo Pizzeria",
+    locale: "en_AE",
+    type: "website",
+  },
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

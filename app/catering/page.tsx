@@ -3,12 +3,15 @@ import {
   CateringEventTemplate,
   type CateringEventTemplateContent,
 } from "@/components/catering/CateringEventTemplate";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { FAQSection } from "@/components/seo/FAQSection";
+import { cateringSchemaData, cateringFaqs } from "@/lib/seo-data";
 import { getCateringPageContent } from "@/lib/cms";
 
 export const metadata: Metadata = {
-  title: "Catering | Rossovivo",
+  title: "Italian Pizza Catering Dubai | Live Wood-Fire Oven Events | Rossovivo",
   description:
-    "Live-fire pizza catering for corporate events, home celebrations, and weddings across Dubai.",
+    "Book Rossovivo's live Italian catering for your next event in Dubai. Wood-fire ovens, pasta stations, fresh ingredients & full setup for weddings, corporates & private parties.",
 };
 
 export default async function CateringPage() {
@@ -69,9 +72,13 @@ export default async function CateringPage() {
   };
 
   return (
-    <CateringEventTemplate
-      content={generalCateringContent}
-      showEventTypeSelection
-    />
+    <>
+      <JsonLd data={cateringSchemaData} />
+      <CateringEventTemplate
+        content={generalCateringContent}
+        showEventTypeSelection
+      />
+      <FAQSection faqs={cateringFaqs} />
+    </>
   );
 }

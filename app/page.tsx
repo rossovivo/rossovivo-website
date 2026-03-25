@@ -3,6 +3,9 @@ import { CateringTeaser } from "@/components/home/CateringTeaser";
 import { LocationsPreview } from "@/components/home/LocationsPreview";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { SocialProof } from "@/components/home/SocialProof";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { FAQSection } from "@/components/seo/FAQSection";
+import { homeSchemaData, homeFaqs } from "@/lib/seo-data";
 import {
   getCateringPageContent,
   getHomePageContent,
@@ -31,6 +34,7 @@ const Index = async () => {
 
   return (
     <>
+      <JsonLd data={homeSchemaData} />
       <Hero
         eyebrow={homePage.heroEyebrow}
         title={homePage.heroTitle}
@@ -62,6 +66,7 @@ const Index = async () => {
         instagramUrl={siteSettings.instagramUrl}
         instagramHandle={homePage.socialSectionHandle}
       />
+      <FAQSection faqs={homeFaqs} />
       <FinalCTA
         title={homePage.eventFormTitle}
         subtitle={homePage.eventFormSubtitle}

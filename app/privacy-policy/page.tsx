@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SimpleRichText } from "@/components/cms/SimpleRichText";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { FAQSection } from "@/components/seo/FAQSection";
+import { privacyPolicySchemaData, privacyPolicyFaqs } from "@/lib/seo-data";
 import { getLegalPageContent } from "@/lib/cms";
 
 const PRIVACY_POLICY_SLUG = "privacy-policy";
@@ -10,15 +13,19 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (!content) {
     return {
-      title: "Privacy Policy | Rossovivo Pizzeria",
+      title: "Privacy Policy | Rossovivo Pizzeria Dubai",
       description:
-        "Read how Rossovivo collects, uses, and protects your personal information.",
+        "Read Rossovivo's privacy policy to learn how we collect, use and protect your personal data. Last updated February 2026.",
+      robots: { index: false, follow: true },
     };
   }
 
   return {
-    title: content.seoTitle || content.title,
-    description: content.seoDescription,
+    title: content.seoTitle || "Privacy Policy | Rossovivo Pizzeria Dubai",
+    description:
+      content.seoDescription ||
+      "Read Rossovivo's privacy policy to learn how we collect, use and protect your personal data. Last updated February 2026.",
+    robots: { index: false, follow: true },
   };
 }
 
@@ -30,6 +37,7 @@ export default async function PrivacyPolicyPage() {
 
   return (
     <>
+      <JsonLd data={privacyPolicySchemaData} />
       <section className="bg-charcoal pt-32 pb-16">
         <div className="container-tight text-center">
           <h1 className="heading-display text-cream">{content.title}</h1>
@@ -57,6 +65,8 @@ export default async function PrivacyPolicyPage() {
           ) : null}
         </div>
       </section>
+
+      <FAQSection faqs={privacyPolicyFaqs} />
     </>
   );
 }
