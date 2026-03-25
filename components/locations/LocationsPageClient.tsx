@@ -19,7 +19,8 @@ export function LocationsPageClient({ locations }: LocationsPageClientProps) {
             transition={{ duration: 0.6 }}
           >
             <h1 className="heading-display text-cream py-8">
-              Our <span className="text-primary">Locations</span>
+              Visit Rossovivo — Two Italian Restaurants in{" "}
+              <span className="text-primary">Dubai</span>
             </h1>
           </motion.div>
         </div>

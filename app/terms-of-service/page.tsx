@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SimpleRichText } from "@/components/cms/SimpleRichText";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { FAQSection } from "@/components/seo/FAQSection";
+import { termsOfServiceSchemaData, termsOfServiceFaqs } from "@/lib/seo-data";
 import { getLegalPageContent } from "@/lib/cms";
 
 const TERMS_OF_SERVICE_SLUG = "terms-of-service";
@@ -10,15 +13,19 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (!content) {
     return {
-      title: "Terms of Service | Rossovivo Pizzeria",
+      title: "Terms of Service | Rossovivo Pizzeria Dubai",
       description:
-        "Review the terms governing use of the Rossovivo website and services.",
+        "Review the terms of service governing your use of the Rossovivo website, online orders and catering bookings in Dubai, UAE.",
+      robots: { index: false, follow: true },
     };
   }
 
   return {
-    title: content.seoTitle || content.title,
-    description: content.seoDescription,
+    title: content.seoTitle || "Terms of Service | Rossovivo Pizzeria Dubai",
+    description:
+      content.seoDescription ||
+      "Review the terms of service governing your use of the Rossovivo website, online orders and catering bookings in Dubai, UAE.",
+    robots: { index: false, follow: true },
   };
 }
 
@@ -30,6 +37,7 @@ export default async function TermsOfServicePage() {
 
   return (
     <>
+      <JsonLd data={termsOfServiceSchemaData} />
       <section className="bg-charcoal pt-32 pb-16">
         <div className="container-tight text-center">
           <h1 className="heading-display text-cream">{content.title}</h1>
@@ -57,6 +65,8 @@ export default async function TermsOfServicePage() {
           ) : null}
         </div>
       </section>
+
+      <FAQSection faqs={termsOfServiceFaqs} />
     </>
   );
 }
