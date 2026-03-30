@@ -1,6 +1,19 @@
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { parseBody } from "next-sanity/webhook";
+
+const typeToRoutes: Record<string, string[]> = {
+  siteSettings: ["/"],
+  location: ["/", "/locations"],
+  homePage: ["/"],
+  aboutPage: ["/about"],
+  contactPage: ["/contact"],
+  cateringPage: ["/catering"],
+  legalPage: ["/terms-of-service", "/privacy-policy"],
+  cateringPolaroid: ["/catering"],
+  cateringFeature: ["/catering"],
+  cateringMediaItem: ["/catering"],
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,30 +29,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Bad request" }, { status: 400 });
     }
 
-    const typeToTag: Record<string, string> = {
-      siteSettings: "siteSettings",
-      location: "location",
-      homePage: "homePage",
-      aboutPage: "aboutPage",
-      contactPage: "contactPage",
-      cateringPage: "cateringPage",
-      legalPage: "legalPage",
-      cateringPolaroid: "cateringPage",
-      cateringFeature: "cateringPage",
-      cateringMediaItem: "cateringPage",
-    };
+    const routes = typeToRoutes[body._type] ?? ["/"];
 
-    const tag = typeToTag[body._type];
-
-    if (tag) {
-      revalidateTag(tag);
+    for (const route of routes) {
+      revalidatePath(route);
     }
 
-    revalidateTag("sanity");
+    if (body._type === "siteSettings") {
+      revalidatePath("/", "layout");
+    }
 
     return NextResponse.json({
       revalidated: true,
-      tag: tag || "sanity",
+      routes,
       now: Date.now(),
     });
   } catch {
