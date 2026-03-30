@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@sanity/client";
+import { unstable_cache } from "next/cache";
 import type {
   AboutPageContent,
   CateringFeatureItem,
@@ -509,19 +510,33 @@ const mapMediaItem = (
 const sanityFetch = async <T>(
   query: string,
   params?: Record<string, unknown>,
+  tags?: string[],
 ): Promise<T | null> => {
   if (!sanityClient) return null;
-  try {
-    return await sanityClient.fetch<T>(query, params ?? {});
-  } catch {
-    return null;
+
+  const fetcher = async () => {
+    try {
+      return await sanityClient!.fetch<T>(query, params ?? {});
+    } catch {
+      return null;
+    }
+  };
+
+  if (tags && tags.length > 0) {
+    const cacheKey = JSON.stringify({ query, params });
+    const cached = unstable_cache(fetcher, [cacheKey], {
+      tags: ["sanity", ...tags],
+    });
+    return cached();
   }
+
+  return fetcher();
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const [legacy, sanity] = await Promise.all([
     getDefaultSiteSettings(),
-    sanityFetch<SanitySiteSettings>(SITE_SETTINGS_QUERY),
+    sanityFetch<SanitySiteSettings>(SITE_SETTINGS_QUERY, undefined, ["siteSettings"]),
   ]);
 
   if (!sanity) return legacy;
@@ -579,7 +594,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 export async function getLocations(): Promise<CmsLocation[]> {
   const [legacy, sanity] = await Promise.all([
     getDefaultLocations(),
-    sanityFetch<SanityLocation[]>(LOCATIONS_QUERY),
+    sanityFetch<SanityLocation[]>(LOCATIONS_QUERY, undefined, ["location"]),
   ]);
 
   if (!Array.isArray(sanity) || sanity.length === 0) return legacy;
@@ -636,7 +651,7 @@ export async function getLocations(): Promise<CmsLocation[]> {
 export async function getHomePageContent(): Promise<HomePageContent> {
   const [legacy, sanity] = await Promise.all([
     getDefaultHomePageContent(),
-    sanityFetch<SanityHomePage>(HOME_PAGE_QUERY),
+    sanityFetch<SanityHomePage>(HOME_PAGE_QUERY, undefined, ["homePage"]),
   ]);
 
   if (!sanity) return legacy;
@@ -722,7 +737,7 @@ export async function getHomePageContent(): Promise<HomePageContent> {
 export async function getAboutPageContent(): Promise<AboutPageContent> {
   const [legacy, sanity] = await Promise.all([
     getDefaultAboutPageContent(),
-    sanityFetch<SanityAboutPage>(ABOUT_PAGE_QUERY),
+    sanityFetch<SanityAboutPage>(ABOUT_PAGE_QUERY, undefined, ["aboutPage"]),
   ]);
 
   if (!sanity) return legacy;
@@ -768,7 +783,7 @@ export async function getAboutPageContent(): Promise<AboutPageContent> {
 export async function getContactPageContent(): Promise<ContactPageContent> {
   const [legacy, sanity] = await Promise.all([
     getDefaultContactPageContent(),
-    sanityFetch<SanityContactPage>(CONTACT_PAGE_QUERY),
+    sanityFetch<SanityContactPage>(CONTACT_PAGE_QUERY, undefined, ["contactPage"]),
   ]);
 
   if (!sanity) return legacy;
@@ -797,7 +812,7 @@ export async function getContactPageContent(): Promise<ContactPageContent> {
 export async function getCateringPageContent(): Promise<CateringPageContent> {
   const [legacy, sanity] = await Promise.all([
     getDefaultCateringPageContent(),
-    sanityFetch<SanityCateringPage>(CATERING_PAGE_QUERY),
+    sanityFetch<SanityCateringPage>(CATERING_PAGE_QUERY, undefined, ["cateringPage"]),
   ]);
 
   if (!sanity) return legacy;
@@ -893,7 +908,7 @@ export async function getLegalPageContent(
 ): Promise<LegalPageContent | null> {
   const [legacy, sanity] = await Promise.all([
     getDefaultLegalPageContent(slug),
-    sanityFetch<SanityLegalPage>(LEGAL_PAGE_QUERY, { slug }),
+    sanityFetch<SanityLegalPage>(LEGAL_PAGE_QUERY, { slug }, ["legalPage"]),
   ]);
 
   if (!sanity) return legacy;
