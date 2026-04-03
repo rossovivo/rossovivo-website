@@ -1,4 +1,5 @@
 import { aboutPageType } from "./aboutPage";
+import { blogPostType } from "./blogPost";
 import { cateringFeatureItemType } from "./cateringFeatureItem";
 import { cateringMediaItemType } from "./cateringMediaItem";
 import { cateringPageType } from "./cateringPage";
@@ -15,6 +16,7 @@ export const schemaTypes = [
   siteSettingsType,
   locationType,
   homePageType,
+  blogPostType,
   cateringPolaroidItemType,
   cateringFeatureItemType,
   cateringMediaItemType,

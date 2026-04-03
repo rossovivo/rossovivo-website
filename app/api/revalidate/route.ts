@@ -13,6 +13,7 @@ const typeToRoutes: Record<string, string[]> = {
   cateringPolaroid: ["/catering"],
   cateringFeature: ["/catering"],
   cateringMediaItem: ["/catering"],
+  blogPost: ["/blog"],
 };
 
 export async function POST(request: NextRequest) {

@@ -3,6 +3,7 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
+import { schemaMarkup } from "@operationnation/sanity-plugin-schema-markup";
 import { schemaTypes } from "./studio/schemaTypes";
 
 const projectId = process.env.SANITY_PROJECT_ID || "qcsslhtr";
@@ -14,7 +15,7 @@ export default defineConfig({
   projectId,
   dataset,
   basePath: "/studio",
-  plugins: [structureTool(), visionTool()],
+  plugins: [structureTool(), visionTool(), schemaMarkup()],
   schema: {
     types: schemaTypes,
   },

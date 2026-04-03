@@ -189,3 +189,25 @@ export type LegalPageContent = {
   body: RichTextDocument | PortableText;
   contactEmail: string;
 };
+
+export type BlogPostSummary = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImageUrl: string;
+  publishedAt: string;
+};
+
+export type SchemaMarkupItem = Record<string, unknown>;
+
+export type BlogPostContent = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImageUrl: string;
+  content: PortableText;
+  publishedAt: string;
+  seoTitle: string;
+  seoDescription: string;
+  schemaMarkup: SchemaMarkupItem[];
+};

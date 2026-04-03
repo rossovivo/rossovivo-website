@@ -3,6 +3,8 @@ import "server-only";
 import { createClient } from "@sanity/client";
 import type {
   AboutPageContent,
+  BlogPostContent,
+  BlogPostSummary,
   CateringFeatureItem,
   CateringMediaItem,
   CateringPageContent,
@@ -929,4 +931,108 @@ export async function getLegalPageContent(
         ? sanity.body
         : fallback?.body || [],
   };
+}
+
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
+type SanityBlogPostSummary = {
+  title?: string | null;
+  slug?: { current?: string | null } | null;
+  excerpt?: string | null;
+  coverImageUrl?: string | null;
+  publishedAt?: string | null;
+};
+
+type SanityBlogPost = SanityBlogPostSummary & {
+  content?: PortableText | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  schemaMarkup?: Record<string, unknown>[] | null;
+};
+
+const BLOG_POSTS_QUERY = `
+  *[_type == "blogPost"] | order(publishedAt desc) {
+    title,
+    "slug": slug.current,
+    excerpt,
+    "coverImageUrl": coverImage.asset->url,
+    publishedAt
+  }
+`;
+
+const BLOG_POST_QUERY = `
+  *[_type == "blogPost" && slug.current == $slug][0] {
+    title,
+    "slug": slug.current,
+    excerpt,
+    "coverImageUrl": coverImage.asset->url,
+    content[] {
+      ...,
+      _type == "image" => {
+        ...,
+        "url": asset->url
+      }
+    },
+    publishedAt,
+    seoTitle,
+    seoDescription,
+    schemaMarkup
+  }
+`;
+
+const BLOG_SLUGS_QUERY = `
+  *[_type == "blogPost"] { "slug": slug.current }
+`;
+
+export async function getBlogPosts(): Promise<BlogPostSummary[]> {
+  const sanity = await sanityFetch<SanityBlogPostSummary[]>(BLOG_POSTS_QUERY);
+
+  if (!Array.isArray(sanity) || sanity.length === 0) return [];
+
+  return sanity
+    .filter((post) => post.slug && typeof post.slug === "string")
+    .map((post) => ({
+      title: toStringValue(post.title),
+      slug: typeof post.slug === "string" ? post.slug : "",
+      excerpt: toStringValue(post.excerpt),
+      coverImageUrl: toStringValue(post.coverImageUrl),
+      publishedAt: toStringValue(post.publishedAt),
+    }));
+}
+
+export async function getBlogPost(
+  slug: string,
+): Promise<BlogPostContent | null> {
+  const sanity = await sanityFetch<SanityBlogPost>(BLOG_POST_QUERY, { slug });
+
+  if (!sanity || !sanity.title) return null;
+
+  return {
+    title: toStringValue(sanity.title),
+    slug: typeof sanity.slug === "string" ? sanity.slug : slug,
+    excerpt: toStringValue(sanity.excerpt),
+    coverImageUrl: toStringValue(sanity.coverImageUrl),
+    content:
+      Array.isArray(sanity.content) && sanity.content.length > 0
+        ? sanity.content
+        : [],
+    publishedAt: toStringValue(sanity.publishedAt),
+    seoTitle: toStringValue(sanity.seoTitle),
+    seoDescription: toStringValue(sanity.seoDescription),
+    schemaMarkup: Array.isArray(sanity.schemaMarkup) ? sanity.schemaMarkup : [],
+  };
+}
+
+export async function getBlogSlugs(): Promise<string[]> {
+  const sanity = await sanityFetch<Array<{ slug?: string | null }>>(
+    BLOG_SLUGS_QUERY,
+  );
+
+  if (!Array.isArray(sanity)) return [];
+
+  return sanity
+    .map((item) => (typeof item.slug === "string" ? item.slug : ""))
+    .filter(Boolean);
 }
