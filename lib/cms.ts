@@ -3,6 +3,8 @@ import "server-only";
 import { createClient } from "@sanity/client";
 import type {
   AboutPageContent,
+  BlogAuthor,
+  BlogCategory,
   BlogPostContent,
   BlogPostSummary,
   CateringFeatureItem,
@@ -939,10 +941,14 @@ export async function getLegalPageContent(
 
 type SanityBlogPostSummary = {
   title?: string | null;
-  slug?: { current?: string | null } | null;
+  slug?: string | null;
   excerpt?: string | null;
   coverImageUrl?: string | null;
   publishedAt?: string | null;
+  featured?: boolean | null;
+  estimatedReadingTime?: number | null;
+  category?: { title?: string | null; slug?: string | null } | null;
+  author?: { name?: string | null; avatarUrl?: string | null } | null;
 };
 
 type SanityBlogPost = SanityBlogPostSummary & {
@@ -950,24 +956,42 @@ type SanityBlogPost = SanityBlogPostSummary & {
   seoTitle?: string | null;
   seoDescription?: string | null;
   schemaMarkup?: Record<string, unknown>[] | null;
+  author?: {
+    name?: string | null;
+    slug?: string | null;
+    avatarUrl?: string | null;
+    bio?: string | null;
+    role?: string | null;
+  } | null;
 };
+
+type SanityCategory = {
+  title?: string | null;
+  slug?: string | null;
+  description?: string | null;
+};
+
+const BLOG_POST_FIELDS = `
+  title,
+  "slug": slug.current,
+  excerpt,
+  "coverImageUrl": coverImage.asset->url,
+  publishedAt,
+  featured,
+  estimatedReadingTime,
+  "category": category->{ title, "slug": slug.current },
+  "author": author->{ name, "avatarUrl": avatar.asset->url }
+`;
 
 const BLOG_POSTS_QUERY = `
   *[_type == "blogPost"] | order(publishedAt desc) {
-    title,
-    "slug": slug.current,
-    excerpt,
-    "coverImageUrl": coverImage.asset->url,
-    publishedAt
+    ${BLOG_POST_FIELDS}
   }
 `;
 
 const BLOG_POST_QUERY = `
   *[_type == "blogPost" && slug.current == $slug][0] {
-    title,
-    "slug": slug.current,
-    excerpt,
-    "coverImageUrl": coverImage.asset->url,
+    ${BLOG_POST_FIELDS},
     content[] {
       ...,
       _type == "image" => {
@@ -975,16 +999,74 @@ const BLOG_POST_QUERY = `
         "url": asset->url
       }
     },
-    publishedAt,
     seoTitle,
     seoDescription,
-    schemaMarkup
+    schemaMarkup,
+    "author": author->{
+      name,
+      "slug": slug.current,
+      "avatarUrl": avatar.asset->url,
+      bio,
+      role
+    }
   }
 `;
 
 const BLOG_SLUGS_QUERY = `
   *[_type == "blogPost"] { "slug": slug.current }
 `;
+
+const CATEGORIES_QUERY = `
+  *[_type == "category"] | order(title asc) {
+    title,
+    "slug": slug.current,
+    description
+  }
+`;
+
+const BLOG_POSTS_BY_CATEGORY_QUERY = `
+  *[_type == "blogPost" && category->slug.current == $categorySlug] | order(publishedAt desc) {
+    ${BLOG_POST_FIELDS}
+  }
+`;
+
+const FEATURED_BLOG_POST_QUERY = `
+  *[_type == "blogPost" && featured == true] | order(publishedAt desc)[0] {
+    ${BLOG_POST_FIELDS}
+  }
+`;
+
+const RELATED_BLOG_POSTS_QUERY = `
+  *[_type == "blogPost" && slug.current != $currentSlug && category->slug.current == $categorySlug] | order(publishedAt desc)[0...$limit] {
+    ${BLOG_POST_FIELDS}
+  }
+`;
+
+function mapBlogPostSummary(post: SanityBlogPostSummary): BlogPostSummary {
+  return {
+    title: toStringValue(post.title),
+    slug: toStringValue(post.slug),
+    excerpt: toStringValue(post.excerpt),
+    coverImageUrl: toStringValue(post.coverImageUrl),
+    publishedAt: toStringValue(post.publishedAt),
+    featured: toBooleanValue(post.featured),
+    estimatedReadingTime: toNumberValue(post.estimatedReadingTime),
+    category:
+      post.category?.title && post.category?.slug
+        ? {
+            title: toStringValue(post.category.title),
+            slug: toStringValue(post.category.slug),
+          }
+        : null,
+    author:
+      post.author?.name
+        ? {
+            name: toStringValue(post.author.name),
+            avatarUrl: toStringValue(post.author.avatarUrl),
+          }
+        : null,
+  };
+}
 
 export async function getBlogPosts(): Promise<BlogPostSummary[]> {
   const sanity = await sanityFetch<SanityBlogPostSummary[]>(BLOG_POSTS_QUERY);
@@ -993,13 +1075,7 @@ export async function getBlogPosts(): Promise<BlogPostSummary[]> {
 
   return sanity
     .filter((post) => post.slug && typeof post.slug === "string")
-    .map((post) => ({
-      title: toStringValue(post.title),
-      slug: typeof post.slug === "string" ? post.slug : "",
-      excerpt: toStringValue(post.excerpt),
-      coverImageUrl: toStringValue(post.coverImageUrl),
-      publishedAt: toStringValue(post.publishedAt),
-    }));
+    .map(mapBlogPostSummary);
 }
 
 export async function getBlogPost(
@@ -1011,7 +1087,7 @@ export async function getBlogPost(
 
   return {
     title: toStringValue(sanity.title),
-    slug: typeof sanity.slug === "string" ? sanity.slug : slug,
+    slug: toStringValue(sanity.slug) || slug,
     excerpt: toStringValue(sanity.excerpt),
     coverImageUrl: toStringValue(sanity.coverImageUrl),
     content:
@@ -1022,6 +1098,25 @@ export async function getBlogPost(
     seoTitle: toStringValue(sanity.seoTitle),
     seoDescription: toStringValue(sanity.seoDescription),
     schemaMarkup: Array.isArray(sanity.schemaMarkup) ? sanity.schemaMarkup : [],
+    featured: toBooleanValue(sanity.featured),
+    estimatedReadingTime: toNumberValue(sanity.estimatedReadingTime),
+    category:
+      sanity.category?.title && sanity.category?.slug
+        ? {
+            title: toStringValue(sanity.category.title),
+            slug: toStringValue(sanity.category.slug),
+          }
+        : null,
+    author:
+      sanity.author?.name
+        ? {
+            name: toStringValue(sanity.author.name),
+            slug: toStringValue(sanity.author.slug),
+            avatarUrl: toStringValue(sanity.author.avatarUrl),
+            bio: toStringValue(sanity.author.bio),
+            role: toStringValue(sanity.author.role),
+          }
+        : null,
   };
 }
 
@@ -1035,4 +1130,62 @@ export async function getBlogSlugs(): Promise<string[]> {
   return sanity
     .map((item) => (typeof item.slug === "string" ? item.slug : ""))
     .filter(Boolean);
+}
+
+export async function getCategories(): Promise<BlogCategory[]> {
+  const sanity = await sanityFetch<SanityCategory[]>(CATEGORIES_QUERY);
+
+  if (!Array.isArray(sanity) || sanity.length === 0) return [];
+
+  return sanity
+    .filter((cat) => cat.slug && typeof cat.slug === "string")
+    .map((cat) => ({
+      title: toStringValue(cat.title),
+      slug: toStringValue(cat.slug),
+      description: toStringValue(cat.description),
+    }));
+}
+
+export async function getBlogPostsByCategory(
+  categorySlug: string,
+): Promise<BlogPostSummary[]> {
+  const sanity = await sanityFetch<SanityBlogPostSummary[]>(
+    BLOG_POSTS_BY_CATEGORY_QUERY,
+    { categorySlug },
+  );
+
+  if (!Array.isArray(sanity) || sanity.length === 0) return [];
+
+  return sanity
+    .filter((post) => post.slug && typeof post.slug === "string")
+    .map(mapBlogPostSummary);
+}
+
+export async function getFeaturedBlogPost(): Promise<BlogPostSummary | null> {
+  const sanity = await sanityFetch<SanityBlogPostSummary>(
+    FEATURED_BLOG_POST_QUERY,
+  );
+
+  if (!sanity || !sanity.slug) return null;
+
+  return mapBlogPostSummary(sanity);
+}
+
+export async function getRelatedBlogPosts(
+  currentSlug: string,
+  categorySlug: string | null,
+  limit = 3,
+): Promise<BlogPostSummary[]> {
+  if (!categorySlug) return [];
+
+  const sanity = await sanityFetch<SanityBlogPostSummary[]>(
+    RELATED_BLOG_POSTS_QUERY,
+    { currentSlug, categorySlug, limit },
+  );
+
+  if (!Array.isArray(sanity) || sanity.length === 0) return [];
+
+  return sanity
+    .filter((post) => post.slug && typeof post.slug === "string")
+    .map(mapBlogPostSummary);
 }

@@ -31,12 +31,28 @@ export const structure: StructureResolver = (S) =>
         .child(S.documentTypeList('legalPage').title('Legal Pages')),
       S.divider(),
       S.listItem()
-        .title('Blog Posts')
-        .schemaType('blogPost')
+        .title('Blog')
         .child(
-          S.documentTypeList('blogPost')
-            .title('Blog Posts')
-            .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }]),
+          S.list()
+            .title('Blog')
+            .items([
+              S.listItem()
+                .title('Posts')
+                .schemaType('blogPost')
+                .child(
+                  S.documentTypeList('blogPost')
+                    .title('Posts')
+                    .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }]),
+                ),
+              S.listItem()
+                .title('Authors')
+                .schemaType('author')
+                .child(S.documentTypeList('author').title('Authors')),
+              S.listItem()
+                .title('Categories')
+                .schemaType('category')
+                .child(S.documentTypeList('category').title('Categories')),
+            ]),
         ),
       S.divider(),
       S.listItem()

@@ -22,6 +22,25 @@ export const blogPostType = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "author",
+      title: "Author",
+      type: "reference",
+      to: [{ type: "author" }],
+    }),
+    defineField({
+      name: "category",
+      title: "Category",
+      type: "reference",
+      to: [{ type: "category" }],
+    }),
+    defineField({
+      name: "featured",
+      title: "Featured",
+      type: "boolean",
+      initialValue: false,
+      description: "Highlight this post on the blog listing page",
+    }),
+    defineField({
       name: "coverImage",
       title: "Cover Image",
       type: "image",
@@ -65,6 +84,12 @@ export const blogPostType = defineType({
       initialValue: () => new Date().toISOString(),
     }),
     defineField({
+      name: "estimatedReadingTime",
+      title: "Estimated Reading Time",
+      type: "number",
+      description: "Minutes to read (leave blank for auto-calculation)",
+    }),
+    defineField({
       name: "seoTitle",
       title: "SEO Title",
       type: "string",
@@ -93,18 +118,22 @@ export const blogPostType = defineType({
   preview: {
     select: {
       title: "title",
-      subtitle: "publishedAt",
+      date: "publishedAt",
       media: "coverImage",
+      categoryTitle: "category.title",
     },
-    prepare({ title, subtitle, media }) {
-      const date = subtitle
-        ? new Date(subtitle).toLocaleDateString("en-US", {
+    prepare({ title, date, media, categoryTitle }) {
+      const formattedDate = date
+        ? new Date(date).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
           })
         : "No date";
-      return { title, subtitle: date, media };
+      const subtitle = categoryTitle
+        ? `${categoryTitle} | ${formattedDate}`
+        : formattedDate;
+      return { title, subtitle, media };
     },
   },
 });

@@ -190,12 +190,30 @@ export type LegalPageContent = {
   contactEmail: string;
 };
 
+export type BlogCategory = {
+  title: string;
+  slug: string;
+  description: string;
+};
+
+export type BlogAuthor = {
+  name: string;
+  slug: string;
+  avatarUrl: string;
+  bio: string;
+  role: string;
+};
+
 export type BlogPostSummary = {
   title: string;
   slug: string;
   excerpt: string;
   coverImageUrl: string;
   publishedAt: string;
+  featured: boolean;
+  estimatedReadingTime: number;
+  category: { title: string; slug: string } | null;
+  author: { name: string; avatarUrl: string } | null;
 };
 
 export type SchemaMarkupItem = Record<string, unknown>;
@@ -210,4 +228,8 @@ export type BlogPostContent = {
   seoTitle: string;
   seoDescription: string;
   schemaMarkup: SchemaMarkupItem[];
+  featured: boolean;
+  estimatedReadingTime: number;
+  category: { title: string; slug: string } | null;
+  author: BlogAuthor | null;
 };

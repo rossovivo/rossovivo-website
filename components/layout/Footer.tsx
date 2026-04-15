@@ -119,6 +119,12 @@ export function Footer({ siteSettings, locations = [] }: FooterProps) {
               >
                 Contact
               </Link>
+              <Link
+                href="/blog"
+                className="text-cream/70 hover:text-primary transition-colors"
+              >
+                Blog
+              </Link>
             </nav>
           </div>
 

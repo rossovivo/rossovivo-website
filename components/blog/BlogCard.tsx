@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
 import type { BlogPostSummary } from "@/lib/cms-types";
 
 type BlogCardProps = {
@@ -32,13 +34,26 @@ export function BlogCard({ post }: BlogCardProps) {
               <span className="text-muted-foreground text-sm">No image</span>
             </div>
           )}
+          {post.category && (
+            <div className="absolute top-3 left-3">
+              <Badge variant="default">{post.category.title}</Badge>
+            </div>
+          )}
         </div>
         <div className="flex flex-col flex-1 p-6">
-          {formattedDate && (
-            <time className="text-sm text-muted-foreground mb-2">
-              {formattedDate}
-            </time>
-          )}
+          <div className="flex items-center gap-3 mb-2">
+            {formattedDate && (
+              <time className="text-sm text-muted-foreground">
+                {formattedDate}
+              </time>
+            )}
+            {post.estimatedReadingTime > 0 && (
+              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <Clock className="w-3 h-3" />
+                {post.estimatedReadingTime} min
+              </span>
+            )}
+          </div>
           <h2 className="heading-card !text-xl mb-3 group-hover:text-primary transition-colors duration-200">
             {post.title}
           </h2>
@@ -47,22 +62,42 @@ export function BlogCard({ post }: BlogCardProps) {
               {post.excerpt}
             </p>
           )}
-          <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-4">
-            Read more
-            <svg
-              className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </span>
+          <div className="flex items-center justify-between mt-4">
+            {post.author ? (
+              <div className="flex items-center gap-2">
+                {post.author.avatarUrl && (
+                  <Image
+                    src={post.author.avatarUrl}
+                    alt={post.author.name}
+                    width={24}
+                    height={24}
+                    className="rounded-full object-cover"
+                  />
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {post.author.name}
+                </span>
+              </div>
+            ) : (
+              <div />
+            )}
+            <span className="inline-flex items-center gap-1 text-primary text-sm font-medium">
+              Read more
+              <svg
+                className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </span>
+          </div>
         </div>
       </article>
     </Link>

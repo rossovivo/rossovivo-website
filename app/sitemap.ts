@@ -1,10 +1,13 @@
 import type { MetadataRoute } from "next";
-import { getBlogPosts } from "@/lib/cms";
+import { getBlogPosts, getCategories } from "@/lib/cms";
 
 const BASE_URL = "https://www.rossovivo.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await getBlogPosts();
+  const [posts, categories] = await Promise.all([
+    getBlogPosts(),
+    getCategories(),
+  ]);
 
   const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
@@ -12,6 +15,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly",
     priority: 0.6,
   }));
+
+  const categoryEntries: MetadataRoute.Sitemap = categories.map(
+    (category) => ({
+      url: `${BASE_URL}/blog/category/${category.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }),
+  );
 
   return [
     {
@@ -50,6 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    ...categoryEntries,
     ...blogEntries,
   ];
 }
