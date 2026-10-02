@@ -20,7 +20,7 @@ const fallbackSiteSettings: SiteSettings = {
   instagramUrl: "https://www.instagram.com/rossovivopizza/",
   facebookUrl: "https://www.facebook.com/profile.php?id=61573936196965",
   tiktokUrl: "https://www.tiktok.com/@rossovivopizza",
-  whatsappNumber: "97143805833",
+  whatsappNumber: "971582061245",
   primaryPhone: "+971 4 380 5833",
   secondaryPhone: "+971 4 427 2477",
   primaryEmail: "catering@rossovivo.ae",

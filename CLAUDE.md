@@ -30,6 +30,7 @@
 - Pages fetch data server-side and delegate rendering to feature components
 
 ## Learnings & Corrections
+- ❌ Assumed Sanity edits go live automatically, but no webhook was registered, so the live site served an 8-day-old cached page → ✅ After CMS changes, verify the live HTML and that the revalidate webhook exists (list via `api.sanity.io/v2021-10-04/hooks/projects/qcsslhtr`)
 
 ## Dependencies & Tooling
 - `@sanity/client@7.17.0` - Sanity CMS client
@@ -52,6 +53,9 @@
 
 ## API & Data Layer
 - Sanity Project: `qcsslhtr`, Dataset: `production`
+- Pages are statically prerendered with no time-based revalidate; Sanity content reaches the live site only through on-demand revalidation
+- Sanity webhook `PPs0eyX4MwJBvWje` ("Next.js revalidate (production)") POSTs `{_type}` to `https://www.rossovivo.com/api/revalidate` on create/update/delete, signed with `SANITY_REVALIDATE_SECRET` (must match the Vercel production env)
+- WhatsApp number lives in Sanity `siteSettings.whatsappNumber` (currently `971582061245`); code fallbacks in `lib/default-cms.ts` and `StickyEventCTA.tsx`
 - API routes: `/api/contact`, `/api/instagram`, `/api/location-reviews`, `/api/menu`, `/api/revalidate`
 - Blog queries: getBlogPosts, getBlogPost, getBlogSlugs, getCategories, getBlogPostsByCategory, getFeaturedBlogPost, getRelatedBlogPosts
 

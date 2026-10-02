@@ -17,7 +17,7 @@ type StickyEventCTAProps = {
 };
 
 export function StickyEventCTA({
-  whatsappNumber = "97143805833",
+  whatsappNumber = "971582061245",
   eventHref = "/catering",
   eventLabel = "Plan an Event",
 }: StickyEventCTAProps) {
